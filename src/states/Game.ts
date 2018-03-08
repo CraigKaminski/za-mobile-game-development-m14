@@ -1,10 +1,19 @@
+import { Board } from '../prefabs/Board';
+
+interface IMapData {
+  grid: number[][];
+  playerBase: any;
+  enemyBase: any;
+}
+
 export class Game extends Phaser.State {
-  public preload() {
-    this.game.load.image('logo', 'images/phaser.png');
-  }
+  public readonly TILE_W = 56;
+  public readonly TILE_H = 64;
+  public readonly MARGIN_X = 30;
+  public readonly MARGIN_Y = 5;
 
   public create() {
-    const logo = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'logo');
-    logo.anchor.setTo(0.5, 0.5);
+    const map: IMapData = JSON.parse(this.cache.getText('map'));
+    const board = new Board(this, map.grid);
   }
 }
