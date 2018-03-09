@@ -46,10 +46,57 @@ export class Board extends Phaser.Group {
 
         tile.inputEnabled = true;
         tile.input.pixelPerfectClick = true;
+        tile.events.onInputDown.add((sprite: Phaser.Sprite) => {
+          const adj = this.getAdjacent(sprite, true);
+          adj.forEach((adjSprite) => adjSprite.alpha = 0.3);
+        }, this);
 
         this.add(tile);
       }
     }
+  }
+
+  private getAdjacent(tile: Phaser.Sprite, rejectBlocked: boolean = false) {
+    const adjacentTiles: Phaser.Sprite[] = [];
+    const row: number = tile.data.row;
+    const col: number = tile.data.col;
+
+    let relativePositions: Array<{ r: number, c: number }> = [];
+
+    if (row % 2 === 0) {
+      relativePositions = [
+        { r: -1, c: 0 },
+        { r: -1, c: -1 },
+        { r: 0, c: -1 },
+        { r: 0, c: 1 },
+        { r: 1, c: 0 },
+        { r: 1, c: -1 },
+      ];
+    } else {
+      relativePositions = [
+        { r: -1, c: 0 },
+        { r: -1, c: 1 },
+        { r: 0, c: -1 },
+        { r: 0, c: 1 },
+        { r: 1, c: 0 },
+        { r: 1, c: 1 },
+      ];
+    }
+
+    relativePositions.forEach((pos) => {
+      if (
+        (row + pos.r >= 0) && (row + pos.r < this.rows)
+        && (col + pos.c >= 0) && (col + pos.c < this.cols)
+      ) {
+        const adjTile = this.getFromRowCol(row + pos.r, col + pos.c);
+
+        if (!rejectBlocked || !adjTile.data.blocked) {
+          adjacentTiles.push(adjTile);
+        }
+      }
+    }, this);
+
+    return adjacentTiles;
   }
 
   private getFromRowCol(row: number, col: number) {
