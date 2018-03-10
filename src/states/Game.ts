@@ -9,6 +9,7 @@ interface IMapData {
 
 export class Game extends Phaser.State {
   public board: Board;
+  public uiBlocked = false;
   public readonly TILE_W = 56;
   public readonly TILE_H = 64;
   public readonly MARGIN_X = 30;
@@ -24,6 +25,14 @@ export class Game extends Phaser.State {
     this.enemyUnits = this.add.group();
 
     this.initUnits();
+  }
+
+  public clearSelection() {
+    this.board.setAll('alpha', 1);
+
+    this.board.forEach((tile: Phaser.Sprite) => {
+      tile.events.onInputDown.removeAll();
+    }, this);
   }
 
   private initUnits() {
