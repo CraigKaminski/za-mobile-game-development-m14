@@ -16,6 +16,8 @@ export class Game extends Phaser.State {
   public readonly TILE_H = 64;
   public readonly MARGIN_X = 30;
   public readonly MARGIN_Y = 5;
+  private allUnits: Unit[];
+  private currentUnitIndex: number;
 
   public create() {
     const map: IMapData = JSON.parse(this.cache.getText('map'));
@@ -25,6 +27,8 @@ export class Game extends Phaser.State {
     this.enemyUnits = this.add.group();
 
     this.initUnits();
+
+    this.newTurn();
   }
 
   public clearSelection() {
@@ -33,6 +37,20 @@ export class Game extends Phaser.State {
     this.board.forEach((tile: Phaser.Sprite) => {
       tile.events.onInputDown.removeAll();
     }, this);
+  }
+
+  public prepareNextUnit() {
+    if (this.currentUnitIndex < this.allUnits.length) {
+      const unit = this.allUnits[this.currentUnitIndex];
+      this.currentUnitIndex++;
+      if (unit.alive) {
+        unit.showMovementOptions();
+      } else {
+        this.prepareNextUnit();
+      }
+    } else {
+      this.newTurn();
+    }
   }
 
   private initUnits() {
@@ -55,5 +73,45 @@ export class Game extends Phaser.State {
 
       this.enemyUnits.add(unit);
     });
+  }
+
+  private newTurn() {
+    this.allUnits = [];
+
+    this.playerUnits.forEachAlive((unit: Unit) => {
+      this.allUnits.push(unit);
+    }, this);
+
+    this.enemyUnits.forEachAlive((unit: Unit) => {
+      this.allUnits.push(unit);
+    }, this);
+
+    this.shuffle(this.allUnits);
+
+    this.currentUnitIndex = 0;
+
+    this.prepareNextUnit();
+  }
+
+  private shuffle(array: any[]) {
+    let counter = array.length;
+    let temp: any;
+    let index: number;
+
+    // While there are elements in the array
+    while (counter > 0) {
+        // Pick a random index
+        index = Math.floor(Math.random() * counter);
+
+        // Decrease counter by 1
+        counter--;
+
+        // And swap the last element with it
+        temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    return array;
   }
 }

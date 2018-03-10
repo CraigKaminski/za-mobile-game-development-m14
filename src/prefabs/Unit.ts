@@ -26,9 +26,27 @@ export class Unit extends Phaser.Sprite {
 
     this.anchor.setTo(0.5);
 
+    /*
     this.inputEnabled = true;
     this.input.pixelPerfectClick = true;
     this.events.onInputDown.add(this.showMovementOptions, this);
+    */
+  }
+
+  public showMovementOptions() {
+    this.state.clearSelection();
+
+    if (this.state.uiBlocked) {
+      return;
+    }
+
+    const currentTile = this.board.getFromRowCol(this.data.row, this.data.col);
+    const adjacentCells = this.board.getAdjacent(currentTile, true);
+
+    adjacentCells.forEach((tile) => {
+      tile.alpha = 0.7;
+      tile.events.onInputDown.add(this.moveUnit, this);
+    });
   }
 
   private attack(attacked: Unit) {
@@ -82,24 +100,10 @@ export class Unit extends Phaser.Sprite {
       this.data.col = tile.data.col;
 
       this.checkBattle();
+
+      this.state.prepareNextUnit();
     }, this);
     unitMovement.start();
 
-  }
-
-  private showMovementOptions() {
-    this.state.clearSelection();
-
-    if (this.state.uiBlocked) {
-      return;
-    }
-
-    const currentTile = this.board.getFromRowCol(this.data.row, this.data.col);
-    const adjacentCells = this.board.getAdjacent(currentTile, true);
-
-    adjacentCells.forEach((tile) => {
-      tile.alpha = 0.7;
-      tile.events.onInputDown.add(this.moveUnit, this);
-    });
   }
 }
