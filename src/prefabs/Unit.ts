@@ -31,18 +31,60 @@ export class Unit extends Phaser.Sprite {
     this.events.onInputDown.add(this.showMovementOptions, this);
   }
 
+  private attack(attacked: Unit) {
+    const attacker = this;
+
+    const damageAttacked = Math.max(0,
+      attacker.data.attack * Math.random() - attacked.data.defense * Math.random());
+    const damageAttacker = Math.max(0,
+      attacked.data.attack * Math.random() - attacker.data.defense * Math.random());
+
+    attacked.data.health -= damageAttacked;
+    attacker.data.health -= damageAttacker;
+
+    if (attacked.data.health <= 0) {
+      attacked.kill();
+    }
+
+    if (attacker.data.health <= 0) {
+      attacker.kill();
+    }
+  }
+
+  private checkBattle() {
+    const rivalUnits = this.data.isPlayer ? this.state.enemyUnits : this.state.playerUnits;
+    let fightUnit: Unit | undefined;
+
+    rivalUnits.forEachAlive((unit: Unit) => {
+      if (this.data.row === unit.data.row && this.data.col === unit.data.col) {
+        fightUnit = unit;
+      }
+    }, this);
+
+    if (fightUnit) {
+      while (this.data.health >= 0 && fightUnit.data.health >= 0) {
+        this.attack(fightUnit);
+      }
+    }
+  }
+
   private moveUnit(tile: Phaser.Sprite) {
     this.state.clearSelection();
     this.state.uiBlocked = true;
+
     const pos = this.board.getXYFromRowCol(tile.data.row, tile.data.col);
+
     const unitMovement = this.game.add.tween(this);
     unitMovement.to(pos, 200);
     unitMovement.onComplete.add(() => {
       this.state.uiBlocked = false;
       this.data.row = tile.data.row;
       this.data.col = tile.data.col;
+
+      this.checkBattle();
     }, this);
     unitMovement.start();
+
   }
 
   private showMovementOptions() {

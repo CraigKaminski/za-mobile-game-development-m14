@@ -9,13 +9,13 @@ interface IMapData {
 
 export class Game extends Phaser.State {
   public board: Board;
+  public enemyUnits: Phaser.Group;
+  public playerUnits: Phaser.Group;
   public uiBlocked = false;
   public readonly TILE_W = 56;
   public readonly TILE_H = 64;
   public readonly MARGIN_X = 30;
   public readonly MARGIN_Y = 5;
-  private enemyUnits: Phaser.Group;
-  private playerUnits: Phaser.Group;
 
   public create() {
     const map: IMapData = JSON.parse(this.cache.getText('map'));
@@ -51,7 +51,7 @@ export class Game extends Phaser.State {
     enemyUnitsData.forEach((unitData) => {
       const unit = new Unit(this, unitData);
 
-      unit.data.isPlayer = true;
+      unit.data.isPlayer = false;
 
       this.enemyUnits.add(unit);
     });
