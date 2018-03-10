@@ -56,6 +56,23 @@ export class Board extends Phaser.Group {
     }
   }
 
+  public getXYFromRowCol(row: number, col: number) {
+    const pos = {
+      x: 0,
+      y: 0,
+    };
+
+    if (row % 2 === 0) {
+      pos.x = this.state.MARGIN_X + col * this.state.TILE_W + this.state.TILE_W / 2;
+    } else {
+      pos.x = this.state.MARGIN_X + col * this.state.TILE_W + this.state.TILE_W / 2 + this.state.TILE_W / 2;
+    }
+
+    pos.y = this.state.MARGIN_Y + row * this.state.TILE_H * 3 / 4 + this.state.TILE_H / 2;
+
+    return pos;
+  }
+
   private getAdjacent(tile: Phaser.Sprite, rejectBlocked: boolean = false) {
     const adjacentTiles: Phaser.Sprite[] = [];
     const row: number = tile.data.row;
@@ -109,22 +126,5 @@ export class Board extends Phaser.Group {
     }, this);
 
     return foundTile;
-  }
-
-  private getXYFromRowCol(row: number, col: number) {
-    const pos = {
-      x: 0,
-      y: 0,
-    };
-
-    if (row % 2 === 0) {
-      pos.x = this.state.MARGIN_X + col * this.state.TILE_W + this.state.TILE_W / 2;
-    } else {
-      pos.x = this.state.MARGIN_X + col * this.state.TILE_W + this.state.TILE_W / 2 + this.state.TILE_W / 2;
-    }
-
-    pos.y = this.state.MARGIN_Y + row * this.state.TILE_H * 3 / 4 + this.state.TILE_H / 2;
-
-    return pos;
   }
 }
