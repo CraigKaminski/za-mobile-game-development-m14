@@ -93,7 +93,7 @@ export class Unit extends Phaser.Sprite {
     });
 
     if (!targetTile) {
-      let randomIndex = Math.floor(Math.random() * adjacentCells.length);
+      const randomIndex = Math.floor(Math.random() * adjacentCells.length);
       targetTile = adjacentCells[randomIndex];
     }
 
@@ -131,6 +131,8 @@ export class Unit extends Phaser.Sprite {
       this.data.col = tile.data.col;
 
       this.checkBattle();
+
+      this.state.checkGameEnd();
 
       this.state.prepareNextUnit();
     }, this);

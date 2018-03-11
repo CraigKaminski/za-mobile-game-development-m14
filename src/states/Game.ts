@@ -3,13 +3,22 @@ import { IUnitData, Unit } from '../prefabs/Unit';
 
 interface IMapData {
   grid: number[][];
-  playerBase: any;
-  enemyBase: any;
+  playerBase: IPlaceData;
+  enemyBase: IPlaceData;
+}
+
+interface IPlaceData {
+  asset: string;
+  col: number;
+  row: number;
 }
 
 export class Game extends Phaser.State {
   public board: Board;
+  public enemyBase: Phaser.Sprite;
   public enemyUnits: Phaser.Group;
+  public places: Phaser.Group;
+  public playerBase: Phaser.Sprite;
   public playerUnits: Phaser.Group;
   public uiBlocked = false;
   public readonly TILE_W = 56;
@@ -18,19 +27,36 @@ export class Game extends Phaser.State {
   public readonly MARGIN_Y = 5;
   private allUnits: Unit[];
   private currentUnitIndex: number;
+  private map: IMapData;
 
   public create() {
-    const map: IMapData = JSON.parse(this.cache.getText('map'));
-    this.board = new Board(this, map.grid);
+    this.map = JSON.parse(this.cache.getText('map'));
+    this.board = new Board(this, this.map.grid);
+    this.places = this.add.group();
 
     this.playerUnits = this.add.group();
     this.enemyUnits = this.add.group();
 
     this.initUnits();
+    this.initPlaces();
 
     this.newTurn();
   }
 
+  public checkGameEnd() {
+    const unit = this.allUnits[this.currentUnitIndex - 1];
+
+    if (unit.data.isPlayer) {
+      if (unit.data.row === this.enemyBase.data.row && unit.data.col === this.enemyBase.data.col) {
+        console.log('you won!');
+      }
+    } else {
+      if (unit.data.row === this.playerBase.data.row && unit.data.col === this.playerBase.data.col) {
+        console.log('you lost!');
+      }
+    }
+  }
+  
   public clearSelection() {
     this.board.setAll('alpha', 1);
 
@@ -51,6 +77,22 @@ export class Game extends Phaser.State {
     } else {
       this.newTurn();
     }
+  }
+
+  private initPlaces() {
+    let pos = this.board.getXYFromRowCol(this.map.playerBase.row, this.map.playerBase.col);
+    this.playerBase = new Phaser.Sprite(this.game, pos.x, pos.y, this.map.playerBase.asset);
+    this.playerBase.anchor.setTo(0.5);
+    this.playerBase.data.row = this.map.playerBase.row;
+    this.playerBase.data.col = this.map.playerBase.col;
+    this.places.add(this.playerBase);
+
+    pos = this.board.getXYFromRowCol(this.map.enemyBase.row, this.map.enemyBase.col);
+    this.enemyBase = new Phaser.Sprite(this.game, pos.x, pos.y, this.map.enemyBase.asset);
+    this.enemyBase.anchor.setTo(0.5);
+    this.enemyBase.data.row = this.map.enemyBase.row;
+    this.enemyBase.data.col = this.map.enemyBase.col;
+    this.places.add(this.enemyBase);
   }
 
   private initUnits() {
