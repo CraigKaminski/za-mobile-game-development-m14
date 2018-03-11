@@ -33,6 +33,14 @@ export class Unit extends Phaser.Sprite {
     */
   }
 
+  public playTurn() {
+    if (this.data.isPlayer) {
+      this.showMovementOptions();
+    } else {
+      this.aiEnemyMovement();
+    }
+  }
+
   public showMovementOptions() {
     this.state.clearSelection();
 
@@ -67,6 +75,29 @@ export class Unit extends Phaser.Sprite {
     if (attacker.data.health <= 0) {
       attacker.kill();
     }
+  }
+
+  private aiEnemyMovement() {
+    let targetTile: Phaser.Sprite | undefined;
+    this.state.clearSelection();
+
+    const currentTile = this.board.getFromRowCol(this.data.row, this.data.col);
+    const adjacentCells = this.board.getAdjacent(currentTile, true);
+
+    adjacentCells.forEach((tile) => {
+      this.state.playerUnits.forEachAlive((unit: Unit) => {
+        if (tile.data.row === unit.data.row && tile.data.col === unit.data.col) {
+          targetTile = tile;
+        }
+      }, this);
+    });
+
+    if (!targetTile) {
+      let randomIndex = Math.floor(Math.random() * adjacentCells.length);
+      targetTile = adjacentCells[randomIndex];
+    }
+
+    this.moveUnit(targetTile);
   }
 
   private checkBattle() {

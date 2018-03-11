@@ -44,7 +44,7 @@ export class Game extends Phaser.State {
       const unit = this.allUnits[this.currentUnitIndex];
       this.currentUnitIndex++;
       if (unit.alive) {
-        unit.showMovementOptions();
+        unit.playTurn();
       } else {
         this.prepareNextUnit();
       }
